@@ -1,1 +1,1 @@
-ECHO is on.
+Test aggregation on different back-ends 
