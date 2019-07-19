@@ -6,7 +6,10 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/AlexeySemin/test/golang-service/db/postgres"
+	"github.com/AlexeySemin/test/golang-service/models"
 	"github.com/gorilla/mux"
+	"github.com/jinzhu/gorm"
 	"github.com/urfave/negroni"
 )
 
@@ -14,6 +17,7 @@ type server struct {
 	port    int
 	router  *mux.Router
 	negroni *negroni.Negroni
+	db      *gorm.DB
 }
 
 func (s *server) Start() {
@@ -39,10 +43,24 @@ func (s *server) registerRoutes() {
 	})
 }
 
-func NewServer(port int) *server {
+// NewServer init and return new server
+func NewServer(port int) (*server, error) {
+	syncedModels := getModels()
+	db, err := postgres.NewDB(syncedModels)
+	if err != nil {
+		return nil, err
+	}
+
 	return &server{
 		port:    port,
 		router:  mux.NewRouter(),
 		negroni: negroni.Classic(),
+		db:      db,
+	}, nil
+}
+
+func getModels() []interface{} {
+	return []interface{}{
+		&models.News{},
 	}
 }
