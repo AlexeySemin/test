@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/AlexeySemin/test/golang-service/controllers"
 	"github.com/AlexeySemin/test/golang-service/db/postgres"
 	"github.com/AlexeySemin/test/golang-service/models"
 	"github.com/gorilla/mux"
@@ -32,15 +33,17 @@ func (s *server) Start() {
 		Handler:      s.negroni,
 	}
 
+	fmt.Println("Server is listening...")
+
 	if err := srv.ListenAndServe(); err != nil {
 		log.Println(err)
 	}
 }
 
 func (s *server) registerRoutes() {
-	s.router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Welcome!")
-	})
+	cc := controllers.NewCommonController(s.db)
+
+	s.router.HandleFunc("/news", cc.FillNewsDB).Methods(http.MethodPost)
 }
 
 // NewServer init and return new server
