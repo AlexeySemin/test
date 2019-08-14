@@ -27,8 +27,8 @@ func (s *server) Start() {
 
 	srv := &http.Server{
 		Addr:         fmt.Sprintf("localhost:%v", s.port),
-		WriteTimeout: time.Second * 15,
-		ReadTimeout:  time.Second * 15,
+		WriteTimeout: time.Second * 45,
+		ReadTimeout:  time.Second * 45,
 		IdleTimeout:  time.Second * 60,
 		Handler:      s.negroni,
 	}
