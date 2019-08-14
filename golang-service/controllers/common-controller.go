@@ -34,3 +34,13 @@ func (cc *CommonController) FillNewsDB(w http.ResponseWriter, r *http.Request) {
 
 	SendResponse(w, nil, "News were created", http.StatusCreated)
 }
+
+func (cc *CommonController) ClearDB(w http.ResponseWriter, r *http.Request) {
+	err := cc.repository.ClearDB()
+	if err != nil {
+		SendResponse(w, nil, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	SendResponse(w, nil, "DB was cleared", http.StatusOK)
+}

@@ -44,6 +44,7 @@ func (s *server) registerRoutes() {
 	cc := controllers.NewCommonController(s.db)
 
 	s.router.HandleFunc("/news", cc.FillNewsDB).Methods(http.MethodPost)
+	s.router.HandleFunc("/news", cc.ClearDB).Methods(http.MethodDelete)
 }
 
 // NewServer init and return new server

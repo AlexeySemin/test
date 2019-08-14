@@ -88,3 +88,12 @@ func (cr *CommonRepository) CreateNews(count int) error {
 
 	return errors.New(strings.Join(threadsErrors, ", "))
 }
+
+func (cr *CommonRepository) ClearDB() error {
+	return cr.ClearNewsTable()
+}
+
+func (cr *CommonRepository) ClearNewsTable() error {
+	var news []*models.News
+	return cr.db.Unscoped().Delete(&news).Error
+}
