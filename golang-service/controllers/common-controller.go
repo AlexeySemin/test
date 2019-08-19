@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/AlexeySemin/test/golang-service/repositories"
 	"github.com/jinzhu/gorm"
@@ -26,21 +27,29 @@ func (cc *CommonController) FillNewsDB(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	start := time.Now()
+
 	err = cc.repository.CreateNews(newsRequest.Count)
 	if err != nil {
 		SendResponse(w, nil, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	SendResponse(w, nil, "News were created", http.StatusCreated)
+	end := time.Now()
+	resp := NewLogResponse(start, end)
+	SendResponse(w, resp, "News were created", http.StatusCreated)
 }
 
 func (cc *CommonController) ClearDB(w http.ResponseWriter, r *http.Request) {
+	start := time.Now()
+
 	err := cc.repository.ClearDB()
 	if err != nil {
 		SendResponse(w, nil, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	SendResponse(w, nil, "DB was cleared", http.StatusOK)
+	end := time.Now()
+	resp := NewLogResponse(start, end)
+	SendResponse(w, resp, "DB was cleared", http.StatusOK)
 }
