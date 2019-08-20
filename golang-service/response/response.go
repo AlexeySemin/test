@@ -1,4 +1,4 @@
-package controllers
+package response
 
 import (
 	"encoding/json"
@@ -10,7 +10,7 @@ type Response struct {
 	Body    interface{}
 }
 
-func SendResponse(w http.ResponseWriter, v interface{}, message string, code int) {
+func Send(w http.ResponseWriter, v interface{}, message string, code int) {
 	resp, err := json.Marshal(&Response{message, v})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

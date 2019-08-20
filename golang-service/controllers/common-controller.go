@@ -5,6 +5,8 @@ import (
 	"time"
 
 	"github.com/AlexeySemin/test/golang-service/repositories"
+	"github.com/AlexeySemin/test/golang-service/request"
+	"github.com/AlexeySemin/test/golang-service/response"
 	"github.com/jinzhu/gorm"
 )
 
@@ -19,11 +21,11 @@ func NewCommonController(db *gorm.DB) *CommonController {
 }
 
 func (cc *CommonController) FillNewsDB(w http.ResponseWriter, r *http.Request) {
-	var newsRequest createNewsRequest
+	var newsRequest request.CreateNews
 
-	err := DecodeAndValidateRequest(r, &newsRequest)
+	err := request.DecodeAndValidate(r, &newsRequest)
 	if err != nil {
-		SendResponse(w, nil, err.Error(), http.StatusBadRequest)
+		response.Send(w, nil, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -31,13 +33,14 @@ func (cc *CommonController) FillNewsDB(w http.ResponseWriter, r *http.Request) {
 
 	err = cc.repository.CreateNews(newsRequest.Count)
 	if err != nil {
-		SendResponse(w, nil, err.Error(), http.StatusInternalServerError)
+		response.Send(w, nil, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	end := time.Now()
-	resp := NewLogResponse(start, end)
-	SendResponse(w, resp, "News were created", http.StatusCreated)
+	resp := response.NewLog(start, end)
+
+	response.Send(w, resp, "News were created", http.StatusCreated)
 }
 
 func (cc *CommonController) ClearDB(w http.ResponseWriter, r *http.Request) {
@@ -45,11 +48,12 @@ func (cc *CommonController) ClearDB(w http.ResponseWriter, r *http.Request) {
 
 	err := cc.repository.ClearDB()
 	if err != nil {
-		SendResponse(w, nil, err.Error(), http.StatusInternalServerError)
+		response.Send(w, nil, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	end := time.Now()
-	resp := NewLogResponse(start, end)
-	SendResponse(w, resp, "DB was cleared", http.StatusOK)
+	resp := response.NewLog(start, end)
+
+	response.Send(w, resp, "DB was cleared", http.StatusOK)
 }

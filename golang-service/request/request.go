@@ -1,4 +1,4 @@
-package controllers
+package request
 
 import (
 	"encoding/json"
@@ -7,7 +7,7 @@ import (
 	"github.com/AlexeySemin/test/golang-service/validator"
 )
 
-func DecodeAndValidateRequest(r *http.Request, v interface{}) error {
+func DecodeAndValidate(r *http.Request, v interface{}) error {
 	if err := json.NewDecoder(r.Body).Decode(v); err != nil {
 		return err
 	}

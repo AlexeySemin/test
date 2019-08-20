@@ -42,9 +42,17 @@ func (s *server) Start() {
 
 func (s *server) registerRoutes() {
 	cc := controllers.NewCommonController(s.db)
+	dbsac := controllers.NewDBSAController(s.db)
+	ssac := controllers.NewSSAController(s.db)
 
 	s.router.HandleFunc("/news", cc.FillNewsDB).Methods(http.MethodPost)
 	s.router.HandleFunc("/news", cc.ClearDB).Methods(http.MethodDelete)
+
+	// DB side aggregation
+	s.router.HandleFunc("/dbsa/news/min-max-avg-rating", dbsac.GetMinMaxAvgRating).Methods(http.MethodGet)
+
+	// Server side aggregation
+	s.router.HandleFunc("/ssa/news/min-max-avg-rating", ssac.GetMinMaxAvgRating).Methods(http.MethodGet)
 }
 
 // NewServer init and return new server
