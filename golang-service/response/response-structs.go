@@ -2,15 +2,15 @@ package response
 
 import "time"
 
-type LogResponse struct {
+type Log struct {
 	Start    time.Time
 	End      time.Time
 	Duration float64
 }
 
-func NewLog(start time.Time, end time.Time) *LogResponse {
+func NewLog(start time.Time, end time.Time) *Log {
 	duration := end.Sub(start).Seconds()
-	return &LogResponse{start, end, duration}
+	return &Log{start, end, duration}
 }
 
 type MinMaxAvgRating struct {

@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"log"
 	"net/http"
 	"time"
 
@@ -22,25 +23,31 @@ func NewSSAController(db *gorm.DB) *SSAController {
 func (ssac *SSAController) GetMinMaxAvgRating(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 
-	news, err := ssac.repository.GetNews()
+	rows, err := ssac.repository.GetRatings()
 	if err != nil {
 		response.Send(w, nil, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	defer rows.Close()
 
 	min := 0
 	max := 0
 	sumRating := 0
-	count := len(news)
+	count := 0
+	var rating int
 
-	for _, n := range news {
-		if n.Rating < min {
-			min = n.Rating
+	for rows.Next() {
+		if err := rows.Scan(&rating); err != nil {
+			log.Print(err)
 		}
-		if n.Rating > max {
-			max = n.Rating
+		if rating < min {
+			min = rating
 		}
-		sumRating += n.Rating
+		if rating > max {
+			max = rating
+		}
+		sumRating += rating
+		count++
 	}
 
 	avg := float64(sumRating) / float64(count)
@@ -55,7 +62,7 @@ func (ssac *SSAController) GetMinMaxAvgRating(w http.ResponseWriter, r *http.Req
 	logResp := response.NewLog(start, end)
 	resp := struct {
 		response.MinMaxAvgRating
-		response.LogResponse
+		response.Log
 	}{*minMaxAvgResp, *logResp}
 
 	response.Send(w, resp, "", http.StatusOK)

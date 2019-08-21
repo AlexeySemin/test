@@ -32,7 +32,7 @@ func (dbsac *DBSAController) GetMinMaxAvgRating(w http.ResponseWriter, r *http.R
 	logResp := response.NewLog(start, end)
 	resp := struct {
 		response.MinMaxAvgRating
-		response.LogResponse
+		response.Log
 	}{*minMaxAvgResp, *logResp}
 
 	response.Send(w, resp, "", http.StatusOK)
