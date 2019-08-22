@@ -2,8 +2,10 @@ package repositories
 
 import (
 	"errors"
+	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/AlexeySemin/test/golang-service/db/postgres"
 	"github.com/AlexeySemin/test/golang-service/models"
@@ -50,7 +52,12 @@ func (cr *CommonRepository) CreateNews(count int) error {
 			}
 
 			for j := 1; j <= part; j++ {
+				rndDateString := randomdata.FullDateInRange("2019-01-01", "2019-08-22") + " " + strconv.Itoa(randomdata.Number(10, 24)) + ":" + strconv.Itoa(randomdata.Number(10, 60))
+				tpl := "Monday _2 Jan 2006 15:04"
+				rndDate, _ := time.Parse(tpl, rndDateString)
+
 				oneNews := &models.News{
+					CreatedAt:    rndDate,
 					Title:        randomdata.State(randomdata.Large),
 					Announcement: randomdata.Address(),
 					Text:         randomdata.Paragraph(),
