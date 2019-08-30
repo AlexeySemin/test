@@ -18,3 +18,7 @@ type MinMaxAvgRating struct {
 	Max int
 	Avg float64
 }
+
+type PerMonthJSONData struct {
+	Data string
+}

@@ -37,3 +37,22 @@ func (dbsac *DBSAController) GetMinMaxAvgRating(w http.ResponseWriter, r *http.R
 
 	response.Send(w, resp, "", http.StatusOK)
 }
+
+func (dbsac *DBSAController) GetPerMonthJSONData(w http.ResponseWriter, r *http.Request) {
+	start := time.Now()
+
+	perMonthJSONResp, err := dbsac.repository.GetPerMonthJSONData()
+	if err != nil {
+		response.Send(w, nil, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	end := time.Now()
+	logResp := response.NewLog(start, end)
+	resp := struct {
+		response.PerMonthJSONData
+		response.Log
+	}{*perMonthJSONResp, *logResp}
+
+	response.Send(w, resp, "", http.StatusOK)
+}

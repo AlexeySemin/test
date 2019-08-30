@@ -28,3 +28,33 @@ func (dbsar *DBSARepository) GetMinMaxAvgRating() (*response.MinMaxAvgRating, er
 
 	return &resp, nil
 }
+
+func (dbsar *DBSARepository) GetPerMonthJSONData() (*response.PerMonthJSONData, error) {
+	var resp response.PerMonthJSONData
+
+	err := dbsar.db.Raw(`
+		select (
+			'[' || string_agg('{"date":' || '"' || date || '","avgRating":' || avg_rating || ',"minRating":' || min_rating || ',"maxRating":' || max_rating || ',"countNews":' || count_news || '}' ,',') || ']'
+		)::json as data
+		from (
+			select
+				date_trunc('month', d.day)::date as date,
+				avg(n.rating) as avg_rating,
+				min(n.rating) as min_rating,
+				max(n.rating) as max_rating,
+				count(n.*) as count_news
+			from (
+				select
+					generate_series(date_trunc('year', '2019-01-01'::date), date_trunc('year', '2019-01-01'::date) + '1 year - 1 day'::interval, '1 day'::interval)::date
+				) d(day)
+			left join news as n on date(n.created_at) = d.day
+			group by 1
+			order by 1
+		) as perMonth
+	`).Scan(&resp).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return &resp, nil
+}
