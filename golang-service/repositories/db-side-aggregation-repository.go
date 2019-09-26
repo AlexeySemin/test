@@ -48,6 +48,7 @@ func (dbsar *DBSARepository) GetPerMonthJSONData() (*response.PerMonthJSONData, 
 					generate_series(date_trunc('year', '2019-01-01'::date), date_trunc('year', '2019-01-01'::date) + '1 year - 1 day'::interval, '1 day'::interval)::date
 				) d(day)
 			left join news as n on date(n.created_at) = d.day
+			where n.deleted_at is null
 			group by 1
 			order by 1
 		) as perMonth

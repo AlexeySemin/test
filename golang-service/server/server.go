@@ -54,6 +54,7 @@ func (s *server) registerRoutes() {
 
 	// Server side aggregation
 	s.router.HandleFunc("/ssa/news/min-max-avg-rating", ssac.GetMinMaxAvgRating).Methods(http.MethodGet)
+	s.router.HandleFunc("/ssa/news/per-month-json-data", ssac.GetPerMonthJSONData).Methods(http.MethodGet)
 }
 
 // NewServer init and return new server

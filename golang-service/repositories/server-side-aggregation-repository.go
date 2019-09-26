@@ -18,7 +18,7 @@ func NewSSARepository(db *gorm.DB) *SSARepository {
 func (ssar *SSARepository) GetNews() ([]*models.News, error) {
 	var news []*models.News
 
-	err := ssar.db.Find(&news).Error
+	err := ssar.db.Where("deleted_at is null").Find(&news).Error
 	if err != nil {
 		return nil, err
 	}
@@ -27,7 +27,16 @@ func (ssar *SSARepository) GetNews() ([]*models.News, error) {
 }
 
 func (ssar *SSARepository) GetRatingsRows() (*sql.Rows, error) {
-	rows, err := ssar.db.Raw("SELECT rating FROM news").Rows()
+	rows, err := ssar.db.Raw("select rating from news where deleted_at is null").Rows()
+	if err != nil {
+		return nil, err
+	}
+
+	return rows, nil
+}
+
+func (ssar *SSARepository) GetRatingsAndDatesRows() (*sql.Rows, error) {
+	rows, err := ssar.db.Raw("select rating, created_at from news where deleted_at is null").Rows()
 	if err != nil {
 		return nil, err
 	}

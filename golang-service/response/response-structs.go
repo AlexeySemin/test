@@ -3,7 +3,7 @@ package response
 import "time"
 
 type Log struct {
-	Duration float64
+	Duration float64 `json:"duration"`
 }
 
 func NewLog(start time.Time, end time.Time) *Log {
@@ -12,11 +12,11 @@ func NewLog(start time.Time, end time.Time) *Log {
 }
 
 type MinMaxAvgRating struct {
-	Min int
-	Max int
-	Avg float64
+	Min int     `json:"min"`
+	Max int     `json:"max"`
+	Avg float64 `json:"avg"`
 }
 
 type PerMonthJSONData struct {
-	Data string
+	Data string `json:"data"`
 }

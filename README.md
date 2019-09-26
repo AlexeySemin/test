@@ -11,4 +11,6 @@
 1. *Get grouped per month JSON data* GET{backend_host}/dbsa/news/per-month-json-data
 ### Server side aggregation
 1. *Get min, max, avg values for the rating* GET{backend_host}/ssa/news/min-max-avg-rating?use_rows={bool}
-  * use_rows = true|false or ignore it, will work with models.News entities unless use_rows=true
+1. *Get grouped per month JSON data* GET{backend_host}/ssa/news/per-month-json-data?use_rows={bool}
+
+* use_rows = true|false or ignore it, will work with models.News entities unless use_rows=true

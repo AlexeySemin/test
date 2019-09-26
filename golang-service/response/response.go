@@ -6,8 +6,8 @@ import (
 )
 
 type Response struct {
-	Message string
-	Body    interface{}
+	Message string      `json:"message"`
+	Body    interface{} `json:"body"`
 }
 
 func Send(w http.ResponseWriter, v interface{}, message string, code int) {

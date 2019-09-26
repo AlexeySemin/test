@@ -1,8 +1,11 @@
 package controllers
 
 import (
+	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/AlexeySemin/test/golang-service/repositories"
@@ -13,6 +16,27 @@ import (
 type SSAController struct {
 	db         *gorm.DB
 	repository *repositories.SSARepository
+}
+
+type MapYearMonthIndex struct {
+	Year  int
+	Month int
+}
+
+type DataByMonth struct {
+	Date      string  `json:"date"`
+	AvgRating float64 `json:"avgRating"`
+	MinRating int     `json:"minRating"`
+	MaxRating int     `json:"maxRating"`
+	CountNews int     `json:"countNews"`
+}
+
+type RatingByMonth struct {
+	Count    int
+	Sum      int
+	Min      int
+	Max      int
+	isMinSet bool
 }
 
 func NewSSAController(db *gorm.DB) *SSAController {
@@ -111,5 +135,137 @@ func (ssac *SSAController) getMinMaxAvgRatingUsingRows() (*response.MinMaxAvgRat
 		Min: min,
 		Max: max,
 		Avg: avg,
+	}, nil
+}
+
+func (ssac *SSAController) GetPerMonthJSONData(w http.ResponseWriter, r *http.Request) {
+	start := time.Now()
+	useRows := r.FormValue("use_rows")
+	var perMonthJSONResp *response.PerMonthJSONData
+	var err error
+
+	if useRows == "" || useRows == "false" {
+		perMonthJSONResp, err = ssac.getPerMonthJSONData()
+	} else {
+		perMonthJSONResp, err = ssac.getPerMonthJSONDataUsingRows()
+	}
+
+	if err != nil {
+		response.Send(w, nil, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	end := time.Now()
+	logResp := response.NewLog(start, end)
+	resp := struct {
+		response.PerMonthJSONData
+		response.Log
+	}{*perMonthJSONResp, *logResp}
+
+	response.Send(w, resp, "", http.StatusOK)
+}
+
+func (ssac *SSAController) getPerMonthJSONData() (*response.PerMonthJSONData, error) {
+	news, err := ssac.repository.GetNews()
+	if err != nil {
+		return nil, err
+	}
+
+	ratingByMonth := map[MapYearMonthIndex]RatingByMonth{}
+	for _, oneNews := range news {
+		mapIndex := MapYearMonthIndex{oneNews.CreatedAt.Year(), int(oneNews.CreatedAt.Month())}
+		max := ratingByMonth[mapIndex].Max
+		if oneNews.Rating > max {
+			max = oneNews.Rating
+		}
+		min := ratingByMonth[mapIndex].Min
+		isMinSet := ratingByMonth[mapIndex].isMinSet
+		if oneNews.Rating < min || !isMinSet {
+			min = oneNews.Rating
+			isMinSet = true
+		}
+		ratingByMonth[mapIndex] = RatingByMonth{
+			Count:    ratingByMonth[mapIndex].Count + 1,
+			Sum:      ratingByMonth[mapIndex].Sum + oneNews.Rating,
+			Min:      min,
+			Max:      max,
+			isMinSet: isMinSet,
+		}
+	}
+
+	dataByMonth := []*DataByMonth{}
+	for key, data := range ratingByMonth {
+		dateStr := strconv.Itoa(key.Year) + "-" + fmt.Sprintf("%02d", key.Month) + "-01"
+		dataByMonth = append(dataByMonth, &DataByMonth{
+			Date:      dateStr,
+			AvgRating: float64(data.Sum) / float64(data.Count),
+			MinRating: data.Min,
+			MaxRating: data.Max,
+			CountNews: data.Count,
+		})
+	}
+	dataByMonthJSON, err := json.Marshal(&dataByMonth)
+	if err != nil {
+		return nil, err
+	}
+
+	return &response.PerMonthJSONData{
+		Data: string(dataByMonthJSON),
+	}, nil
+}
+
+func (ssac *SSAController) getPerMonthJSONDataUsingRows() (*response.PerMonthJSONData, error) {
+	rows, err := ssac.repository.GetRatingsAndDatesRows()
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var rating int
+	var createdAt time.Time
+	ratingByMonth := map[MapYearMonthIndex]RatingByMonth{}
+	for rows.Next() {
+		if err := rows.Scan(&rating, &createdAt); err != nil {
+			log.Print(err)
+		}
+
+		mapIndex := MapYearMonthIndex{createdAt.Year(), int(createdAt.Month())}
+		max := ratingByMonth[mapIndex].Max
+		if rating > max {
+			max = rating
+		}
+		min := ratingByMonth[mapIndex].Min
+		isMinSet := ratingByMonth[mapIndex].isMinSet
+		if rating < min || !isMinSet {
+			min = rating
+			isMinSet = true
+		}
+		ratingByMonth[mapIndex] = RatingByMonth{
+			Count:    ratingByMonth[mapIndex].Count + 1,
+			Sum:      ratingByMonth[mapIndex].Sum + rating,
+			Min:      min,
+			Max:      max,
+			isMinSet: isMinSet,
+		}
+	}
+
+	dataByMonth := []*DataByMonth{}
+	for key, data := range ratingByMonth {
+		dateStr := strconv.Itoa(key.Year) + "-" + fmt.Sprintf("%02d", key.Month) + "-01"
+		dataByMonth = append(dataByMonth, &DataByMonth{
+			Date:      dateStr,
+			AvgRating: float64(data.Sum) / float64(data.Count),
+			MinRating: data.Min,
+			MaxRating: data.Max,
+			CountNews: data.Count,
+		})
+	}
+	dataByMonthJSON, err := json.Marshal(&dataByMonth)
+	if err != nil {
+		return nil, err
+	}
+
+	return &response.PerMonthJSONData{
+		Data: string(dataByMonthJSON),
 	}, nil
 }
