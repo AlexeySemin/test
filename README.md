@@ -1,10 +1,10 @@
 # ENDPOINTS
-### Backend hosts
+**Backend hosts**
 * Golang backend_host = localhost:8081
 ### Common
 1. *Create news* POST{backend_host}/news
-  * body - "count":{count_news}
-  * count_news=500000 is a max value per request
+    * body - "count":{count_news}
+    * count_news == 500000 is a max value per request
 1. *Delete news* DELETE{backend_host}/news
 ### DB side aggregation
 1. *Get min, max, avg values for the rating* GET{backend_host}/dbsa/news/min-max-avg-rating
