@@ -1,0 +1,53 @@
+definitions:
+  request.CreateNews:
+    properties:
+      count:
+        type: integer
+    required:
+    - count
+    type: object
+  response.Log:
+    properties:
+      duration:
+        type: number
+    type: object
+host: localhost:8081
+info:
+  contact: {}
+  license:
+    name: MIT
+  title: Swagger Example API
+  version: 0.0.1
+paths:
+  /api/news:
+    post:
+      consumes:
+      - multipart/form-data
+      description: creates news
+      parameters:
+      - description: Count of news
+        in: body
+        name: Count
+        required: true
+        schema:
+          $ref: '#/definitions/request.CreateNews'
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/response.Log'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Creates news
+swagger: "2.0"

@@ -12,6 +12,9 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
 	"github.com/urfave/negroni"
+
+	"github.com/swaggo/http-swagger"
+	"../docs"
 )
 
 type server struct {
@@ -44,6 +47,10 @@ func (s *server) registerRoutes() {
 	cc := controllers.NewCommonController(s.db)
 	dbsac := controllers.NewDBSAController(s.db)
 	ssac := controllers.NewSSAController(s.db)
+
+	s.router.HandleFunc("/swagger/*", httpSwagger.Handler(
+		httpSwagger.URL("http://localhost:8081/swagger/doc.json")
+	)).Methods(http.MethodGet)
 
 	subrouter := s.router.PathPrefix("/api").Subrouter()
 

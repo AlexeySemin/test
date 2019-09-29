@@ -1,0 +1,82 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "Swagger Example API",
+        "contact": {},
+        "license": {
+            "name": "MIT"
+        },
+        "version": "0.0.1"
+    },
+    "host": "localhost:8081",
+    "paths": {
+        "/api/news": {
+            "post": {
+                "description": "creates news",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Creates news",
+                "parameters": [
+                    {
+                        "description": "Count of news",
+                        "name": "Count",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/request.CreateNews"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/response.Log"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "request.CreateNews": {
+            "type": "object",
+            "required": [
+                "count"
+            ],
+            "properties": {
+                "count": {
+                    "type": "integer"
+                }
+            }
+        },
+        "response.Log": {
+            "type": "object",
+            "properties": {
+                "duration": {
+                    "type": "number"
+                }
+            }
+        }
+    }
+}

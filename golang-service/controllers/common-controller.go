@@ -20,6 +20,16 @@ func NewCommonController(db *gorm.DB) *CommonController {
 	return &CommonController{db, repository}
 }
 
+// FillNewsDB godoc
+// @Summary Creates news
+// @Description creates news
+// @Accept mpfd
+// @Produce  json
+// @Param Count body request.CreateNews true "Count of news"
+// @Success 200 {array} response.Log
+// @Failure 400 {string} response.Log Bad request
+// @Failure 500 {string} response.Log Internal server error
+// @Router /api/news [post]
 func (cc *CommonController) FillNewsDB(w http.ResponseWriter, r *http.Request) {
 	var newsRequest request.CreateNews
 
