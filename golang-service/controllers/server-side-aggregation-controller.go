@@ -81,6 +81,7 @@ func (ssac *SSAController) getMinMaxAvgRating() (*response.MinMaxAvgRating, erro
 	max := 0
 	sumRating := 0
 	count := 0
+	avg := 0.0
 
 	for _, oneNews := range news {
 		if oneNews.Rating < min {
@@ -93,7 +94,9 @@ func (ssac *SSAController) getMinMaxAvgRating() (*response.MinMaxAvgRating, erro
 		count++
 	}
 
-	avg := float64(sumRating) / float64(count)
+	if count > 0 {
+		avg = float64(sumRating) / float64(count)
+	}
 
 	return &response.MinMaxAvgRating{
 		Min: min,
@@ -113,6 +116,7 @@ func (ssac *SSAController) getMinMaxAvgRatingUsingRows() (*response.MinMaxAvgRat
 	max := 0
 	sumRating := 0
 	count := 0
+	avg := 0.0
 	var rating int
 
 	for rows.Next() {
@@ -129,7 +133,9 @@ func (ssac *SSAController) getMinMaxAvgRatingUsingRows() (*response.MinMaxAvgRat
 		count++
 	}
 
-	avg := float64(sumRating) / float64(count)
+	if count > 0 {
+		avg = float64(sumRating) / float64(count)
+	}
 
 	return &response.MinMaxAvgRating{
 		Min: min,
