@@ -45,16 +45,18 @@ func (s *server) registerRoutes() {
 	dbsac := controllers.NewDBSAController(s.db)
 	ssac := controllers.NewSSAController(s.db)
 
-	s.router.HandleFunc("/news", cc.FillNewsDB).Methods(http.MethodPost)
-	s.router.HandleFunc("/news", cc.ClearDB).Methods(http.MethodDelete)
+	subrouter := s.router.PathPrefix("/api").Subrouter()
+
+	subrouter.HandleFunc("/news", cc.FillNewsDB).Methods(http.MethodPost)
+	subrouter.HandleFunc("/news", cc.ClearDB).Methods(http.MethodDelete)
 
 	// DB side aggregation
-	s.router.HandleFunc("/dbsa/news/min-max-avg-rating", dbsac.GetMinMaxAvgRating).Methods(http.MethodGet)
-	s.router.HandleFunc("/dbsa/news/per-month-json-data", dbsac.GetPerMonthJSONData).Methods(http.MethodGet)
+	subrouter.HandleFunc("/dbsa/news/min-max-avg-rating", dbsac.GetMinMaxAvgRating).Methods(http.MethodGet)
+	subrouter.HandleFunc("/dbsa/news/per-month-json-data", dbsac.GetPerMonthJSONData).Methods(http.MethodGet)
 
 	// Server side aggregation
-	s.router.HandleFunc("/ssa/news/min-max-avg-rating", ssac.GetMinMaxAvgRating).Methods(http.MethodGet)
-	s.router.HandleFunc("/ssa/news/per-month-json-data", ssac.GetPerMonthJSONData).Methods(http.MethodGet)
+	subrouter.HandleFunc("/ssa/news/min-max-avg-rating", ssac.GetMinMaxAvgRating).Methods(http.MethodGet)
+	subrouter.HandleFunc("/ssa/news/per-month-json-data", ssac.GetPerMonthJSONData).Methods(http.MethodGet)
 }
 
 // NewServer init and return new server
