@@ -21,14 +21,14 @@ func NewCommonController(db *gorm.DB) *CommonController {
 }
 
 // FillNewsDB godoc
-// @Summary Creates news
-// @Description creates news
+// @Summary Create news
+// @Description create news
 // @Accept mpfd
 // @Produce  json
 // @Param Count body request.CreateNews true "Count of news"
-// @Success 200 {array} response.Log
-// @Failure 400 {string} response.Log Bad request
-// @Failure 500 {string} response.Log Internal server error
+// @Success 201 {object} response.LogOnly Created
+// @Failure 400 {object} response.Response Bad request
+// @Failure 500 {object} response.Response Internal server error
 // @Router /api/news [post]
 func (cc *CommonController) FillNewsDB(w http.ResponseWriter, r *http.Request) {
 	var newsRequest request.CreateNews
@@ -53,10 +53,17 @@ func (cc *CommonController) FillNewsDB(w http.ResponseWriter, r *http.Request) {
 	response.Send(w, resp, "News were created", http.StatusCreated)
 }
 
+// ClearDB godoc
+// @Summary Delete news
+// @Description delete news
+// @Produce  json
+// @Success 200 {object} response.LogOnly Deleted
+// @Failure 500 {object} response.Response Internal server error
+// @Router /api/news [delete]
 func (cc *CommonController) ClearDB(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 
-	err := cc.repository.ClearDB()
+	err := cc.repository.ClearNewsTable()
 	if err != nil {
 		response.Send(w, nil, err.Error(), http.StatusInternalServerError)
 		return
@@ -65,5 +72,5 @@ func (cc *CommonController) ClearDB(w http.ResponseWriter, r *http.Request) {
 	end := time.Now()
 	resp := response.NewLog(start, end)
 
-	response.Send(w, resp, "DB was cleared", http.StatusOK)
+	response.Send(w, resp, "News were deleted", http.StatusOK)
 }

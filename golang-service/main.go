@@ -6,7 +6,7 @@ import (
 	"github.com/AlexeySemin/test/golang-service/server"
 )
 
-// @title Swagger Example API
+// @title Swagger API doc
 // @version 0.0.1
 // @host localhost:8081
 // @license.name MIT

@@ -44,10 +44,18 @@ func NewSSAController(db *gorm.DB) *SSAController {
 	return &SSAController{db, repository}
 }
 
+// GetMinMaxAvgRating godoc
+// @Summary Server side aggregation of the min, max, avg news rating
+// @Description Server side aggregation of the min, max, avg news rating
+// @Produce json
+// @Param use_rows query string false "If use_rows=false or doesn't exist server will work with News entities, otherwise will work with DB rows" Enums(true, false)
+// @Success 200 {object} response.MinMaxAvgRating
+// @Failure 500 {object} response.Response Internal server error
+// @Router /api/ssa/news/min-max-avg-rating [get]
 func (ssac *SSAController) GetMinMaxAvgRating(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 	useRows := r.FormValue("use_rows")
-	var minMaxAvgResp *response.MinMaxAvgRating
+	var minMaxAvgResp *response.MinMaxAvg
 	var err error
 
 	if useRows == "" || useRows == "false" {
@@ -64,14 +72,14 @@ func (ssac *SSAController) GetMinMaxAvgRating(w http.ResponseWriter, r *http.Req
 	end := time.Now()
 	logResp := response.NewLog(start, end)
 	resp := struct {
-		response.MinMaxAvgRating
+		response.MinMaxAvg
 		response.Log
 	}{*minMaxAvgResp, *logResp}
 
 	response.Send(w, resp, "", http.StatusOK)
 }
 
-func (ssac *SSAController) getMinMaxAvgRating() (*response.MinMaxAvgRating, error) {
+func (ssac *SSAController) getMinMaxAvgRating() (*response.MinMaxAvg, error) {
 	news, err := ssac.repository.GetNews()
 	if err != nil {
 		return nil, err
@@ -98,14 +106,14 @@ func (ssac *SSAController) getMinMaxAvgRating() (*response.MinMaxAvgRating, erro
 		avg = float64(sumRating) / float64(count)
 	}
 
-	return &response.MinMaxAvgRating{
+	return &response.MinMaxAvg{
 		Min: min,
 		Max: max,
 		Avg: avg,
 	}, nil
 }
 
-func (ssac *SSAController) getMinMaxAvgRatingUsingRows() (*response.MinMaxAvgRating, error) {
+func (ssac *SSAController) getMinMaxAvgRatingUsingRows() (*response.MinMaxAvg, error) {
 	rows, err := ssac.repository.GetRatingsRows()
 	if err != nil {
 		return nil, err
@@ -137,17 +145,25 @@ func (ssac *SSAController) getMinMaxAvgRatingUsingRows() (*response.MinMaxAvgRat
 		avg = float64(sumRating) / float64(count)
 	}
 
-	return &response.MinMaxAvgRating{
+	return &response.MinMaxAvg{
 		Min: min,
 		Max: max,
 		Avg: avg,
 	}, nil
 }
 
+// GetPerMonthJSONData godoc
+// @Summary Server side aggregation of the min, max, avg, count news per month
+// @Description get min, max, avg, count news per month
+// @Produce json
+// @Param use_rows query string false "If use_rows=false or doesn't exist server will work with News entities, otherwise will work with DB rows" Enums(true, false)
+// @Success 200 {object} response.PerMonthJSONData
+// @Failure 500 {object} response.Response Internal server error
+// @Router /api/ssa/news/per-month-json-data [get]
 func (ssac *SSAController) GetPerMonthJSONData(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 	useRows := r.FormValue("use_rows")
-	var perMonthJSONResp *response.PerMonthJSONData
+	var perMonthJSONResp *response.PerMonthJSON
 	var err error
 
 	if useRows == "" || useRows == "false" {
@@ -164,14 +180,14 @@ func (ssac *SSAController) GetPerMonthJSONData(w http.ResponseWriter, r *http.Re
 	end := time.Now()
 	logResp := response.NewLog(start, end)
 	resp := struct {
-		response.PerMonthJSONData
+		response.PerMonthJSON
 		response.Log
 	}{*perMonthJSONResp, *logResp}
 
 	response.Send(w, resp, "", http.StatusOK)
 }
 
-func (ssac *SSAController) getPerMonthJSONData() (*response.PerMonthJSONData, error) {
+func (ssac *SSAController) getPerMonthJSONData() (*response.PerMonthJSON, error) {
 	news, err := ssac.repository.GetNews()
 	if err != nil {
 		return nil, err
@@ -215,12 +231,12 @@ func (ssac *SSAController) getPerMonthJSONData() (*response.PerMonthJSONData, er
 		return nil, err
 	}
 
-	return &response.PerMonthJSONData{
+	return &response.PerMonthJSON{
 		Data: string(dataByMonthJSON),
 	}, nil
 }
 
-func (ssac *SSAController) getPerMonthJSONDataUsingRows() (*response.PerMonthJSONData, error) {
+func (ssac *SSAController) getPerMonthJSONDataUsingRows() (*response.PerMonthJSON, error) {
 	rows, err := ssac.repository.GetRatingsAndDatesRows()
 	if err != nil {
 		return nil, err
@@ -271,7 +287,7 @@ func (ssac *SSAController) getPerMonthJSONDataUsingRows() (*response.PerMonthJSO
 		return nil, err
 	}
 
-	return &response.PerMonthJSONData{
+	return &response.PerMonthJSON{
 		Data: string(dataByMonthJSON),
 	}, nil
 }

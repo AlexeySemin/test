@@ -14,8 +14,8 @@ func NewDBSARepository(db *gorm.DB) *DBSARepository {
 	return &DBSARepository{db}
 }
 
-func (dbsar *DBSARepository) GetMinMaxAvgRating() (*response.MinMaxAvgRating, error) {
-	var resp response.MinMaxAvgRating
+func (dbsar *DBSARepository) GetMinMaxAvgRating() (*response.MinMaxAvg, error) {
+	var resp response.MinMaxAvg
 
 	// SELECT min(rating), max(rating), avg(rating) FROM "news"
 	err := dbsar.db.Table("news").
@@ -29,8 +29,8 @@ func (dbsar *DBSARepository) GetMinMaxAvgRating() (*response.MinMaxAvgRating, er
 	return &resp, nil
 }
 
-func (dbsar *DBSARepository) GetPerMonthJSONData() (*response.PerMonthJSONData, error) {
-	var resp response.PerMonthJSONData
+func (dbsar *DBSARepository) GetPerMonthJSONData() (*response.PerMonthJSON, error) {
+	var resp response.PerMonthJSON
 
 	err := dbsar.db.Raw(`
 		select (

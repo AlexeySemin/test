@@ -2,6 +2,7 @@ definitions:
   request.CreateNews:
     properties:
       count:
+        maximum: 500000
         type: integer
     required:
     - count
@@ -11,19 +12,106 @@ definitions:
       duration:
         type: number
     type: object
+  response.LogOnly:
+    properties:
+      body:
+        $ref: '#/definitions/response.Log'
+        type: object
+      message:
+        type: string
+    type: object
+  response.MinMaxAvgRating:
+    properties:
+      body:
+        properties:
+          avg:
+            type: number
+          duration:
+            type: number
+          max:
+            type: integer
+          min:
+            type: integer
+        type: object
+      message:
+        type: string
+    type: object
+  response.PerMonthJSONData:
+    properties:
+      body:
+        properties:
+          data:
+            type: string
+          duration:
+            type: number
+        type: object
+      message:
+        type: string
+    type: object
+  response.Response:
+    properties:
+      body:
+        type: object
+      message:
+        type: string
+    type: object
 host: localhost:8081
 info:
   contact: {}
   license:
     name: MIT
-  title: Swagger Example API
+  title: Swagger API doc
   version: 0.0.1
 paths:
+  /api/dbsa/news/min-max-avg-rating:
+    get:
+      description: get min, max, avg news rating
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.MinMaxAvgRating'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: DB side aggregation of the min, max, avg news rating
+  /api/dbsa/news/per-month-json-data:
+    get:
+      description: get min, max, avg, count news per month
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.PerMonthJSONData'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: DB side aggregation of the min, max, avg, count news per month
   /api/news:
+    delete:
+      description: delete news
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.LogOnly'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Delete news
     post:
       consumes:
       - multipart/form-data
-      description: creates news
+      description: create news
       parameters:
       - description: Count of news
         in: body
@@ -35,19 +123,65 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
+        "201":
+          description: Created
           schema:
-            items:
-              $ref: '#/definitions/response.Log'
-            type: array
+            $ref: '#/definitions/response.LogOnly'
         "400":
           description: Bad Request
           schema:
-            type: string
+            $ref: '#/definitions/response.Response'
         "500":
           description: Internal Server Error
           schema:
-            type: string
-      summary: Creates news
+            $ref: '#/definitions/response.Response'
+      summary: Create news
+  /api/ssa/news/min-max-avg-rating:
+    get:
+      description: Server side aggregation of the min, max, avg news rating
+      parameters:
+      - description: If use_rows=false or doesn't exist server will work with News
+          entities, otherwise will work with DB rows
+        enum:
+        - "true"
+        - "false"
+        in: query
+        name: use_rows
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.MinMaxAvgRating'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Server side aggregation of the min, max, avg news rating
+  /api/ssa/news/per-month-json-data:
+    get:
+      description: get min, max, avg, count news per month
+      parameters:
+      - description: If use_rows=false or doesn't exist server will work with News
+          entities, otherwise will work with DB rows
+        enum:
+        - "true"
+        - "false"
+        in: query
+        name: use_rows
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.PerMonthJSONData'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Server side aggregation of the min, max, avg, count news per month
 swagger: "2.0"

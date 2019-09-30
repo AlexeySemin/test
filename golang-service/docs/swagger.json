@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "title": "Swagger Example API",
+        "title": "Swagger API doc",
         "contact": {},
         "license": {
             "name": "MIT"
@@ -10,16 +10,62 @@
     },
     "host": "localhost:8081",
     "paths": {
+        "/api/dbsa/news/min-max-avg-rating": {
+            "get": {
+                "description": "get min, max, avg news rating",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "DB side aggregation of the min, max, avg news rating",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.MinMaxAvgRating"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/dbsa/news/per-month-json-data": {
+            "get": {
+                "description": "get min, max, avg, count news per month",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "DB side aggregation of the min, max, avg, count news per month",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.PerMonthJSONData"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/news": {
             "post": {
-                "description": "creates news",
+                "description": "create news",
                 "consumes": [
                     "multipart/form-data"
                 ],
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Creates news",
+                "summary": "Create news",
                 "parameters": [
                     {
                         "description": "Count of news",
@@ -33,25 +79,113 @@
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
+                    "201": {
+                        "description": "Created",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/response.Log"
-                            }
+                            "$ref": "#/definitions/response.LogOnly"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/response.Response"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "delete news",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Delete news",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.LogOnly"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/ssa/news/min-max-avg-rating": {
+            "get": {
+                "description": "Server side aggregation of the min, max, avg news rating",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Server side aggregation of the min, max, avg news rating",
+                "parameters": [
+                    {
+                        "enum": [
+                            "true",
+                            "false"
+                        ],
+                        "type": "string",
+                        "description": "If use_rows=false or doesn't exist server will work with News entities, otherwise will work with DB rows",
+                        "name": "use_rows",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.MinMaxAvgRating"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/ssa/news/per-month-json-data": {
+            "get": {
+                "description": "get min, max, avg, count news per month",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Server side aggregation of the min, max, avg, count news per month",
+                "parameters": [
+                    {
+                        "enum": [
+                            "true",
+                            "false"
+                        ],
+                        "type": "string",
+                        "description": "If use_rows=false or doesn't exist server will work with News entities, otherwise will work with DB rows",
+                        "name": "use_rows",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.PerMonthJSONData"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
@@ -66,7 +200,8 @@
             ],
             "properties": {
                 "count": {
-                    "type": "integer"
+                    "type": "integer",
+                    "maximum": 500000
                 }
             }
         },
@@ -75,6 +210,73 @@
             "properties": {
                 "duration": {
                     "type": "number"
+                }
+            }
+        },
+        "response.LogOnly": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "object",
+                    "$ref": "#/definitions/response.Log"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.MinMaxAvgRating": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "object",
+                    "properties": {
+                        "avg": {
+                            "type": "number"
+                        },
+                        "duration": {
+                            "type": "number"
+                        },
+                        "max": {
+                            "type": "integer"
+                        },
+                        "min": {
+                            "type": "integer"
+                        }
+                    }
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.PerMonthJSONData": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "object",
+                    "properties": {
+                        "data": {
+                            "type": "string"
+                        },
+                        "duration": {
+                            "type": "number"
+                        }
+                    }
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.Response": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "object"
+                },
+                "message": {
+                    "type": "string"
                 }
             }
         }
